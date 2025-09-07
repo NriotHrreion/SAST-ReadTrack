@@ -4,6 +4,7 @@ import com.sast.sastreadtrack.entity.User;
 import com.sast.sastreadtrack.mapper.BookMapper;
 import com.sast.sastreadtrack.mapper.UserMapper;
 import com.sast.sastreadtrack.service.UserService;
+import com.sast.sastreadtrack.utils.MD5;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -39,22 +40,22 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.selectByName(username);
         if(user == null) return null;
 
-        final String realHashedPassword = user.getPassword();
-        if(!realHashedPassword.equals(encoder.encode(password))) {
+        final String realPassword = user.getPassword();
+        if(!encoder.matches(password, realPassword)) {
             return null;
         }
 
-        return encoder.encode(username + realHashedPassword + getCurrentDateString());
+        return MD5.hash(user.getUsername() + realPassword + getCurrentDateString());
     }
 
     @Override
-    public boolean authToken(String username, String token) {
-        User user = userMapper.selectByName(username);
+    public boolean authToken(Long id, String token) {
+        User user = userMapper.selectById(id);
         if(user == null) return false;
 
-        final String hashedPassword = user.getPassword();
-        final String realToken = encoder.encode(username + hashedPassword + getCurrentDateString());
-        return realToken.equals(token);
+        final String realPassword = user.getPassword();
+        final String realToken = MD5.hash(user.getUsername() + realPassword + getCurrentDateString());
+        return token.equals(realToken);
     }
 
     @Override

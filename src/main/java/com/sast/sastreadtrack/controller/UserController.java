@@ -2,9 +2,11 @@ package com.sast.sastreadtrack.controller;
 
 import com.sast.sastreadtrack.entity.User;
 import com.sast.sastreadtrack.service.UserService;
+import com.sast.sastreadtrack.utils.ResponseMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -28,9 +30,9 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@RequestBody User user) {
         if(!userService.register(user)) {
-            return ResponseEntity.badRequest().build();
+            return ResponseMessage.of(HttpStatus.CONFLICT, "无法创建用户，用户已存在");
         }
-        return ResponseEntity.ok().build();
+        return ResponseMessage.ok();
     }
 
     /**
@@ -40,20 +42,20 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginForm) {
         if(!loginForm.containsKey("username") || !loginForm.containsKey("password")) {
-            return ResponseEntity.badRequest().build();
+            return ResponseMessage.of(HttpStatus.BAD_REQUEST);
         }
 
         final String username = loginForm.get("username");
         final String password = loginForm.get("password");
         String token = userService.login(username, password);
         if(token == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseMessage.of(HttpStatus.FORBIDDEN, "登录失败");
         }
 
         User user = userService.getUserByName(username);
         Map<String, Object> res = new HashMap<>();
         res.put("token", token);
         res.put("id", user.getId());
-        return ResponseEntity.of(Optional.of(res));
+        return ResponseMessage.ok(res);
     }
 }

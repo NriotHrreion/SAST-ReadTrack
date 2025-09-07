@@ -8,7 +8,6 @@ import java.util.List;
 /**
  * 书籍服务接口
  */
-@Service
 public interface BookService {
     /**
      * 添加新书籍
@@ -44,6 +43,11 @@ public interface BookService {
      * 查询用户的所有书籍
      */
     List<Book> getUserBooks(Long userId);
+
+    /**
+     * 查询用户的某本书籍
+     */
+    Book getUserBook(Long userId, Long bookId);
 
     /**
      * 按阅读状态筛选书籍

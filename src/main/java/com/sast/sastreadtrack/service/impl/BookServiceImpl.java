@@ -3,10 +3,12 @@ package com.sast.sastreadtrack.service.impl;
 import com.sast.sastreadtrack.entity.Book;
 import com.sast.sastreadtrack.mapper.BookMapper;
 import com.sast.sastreadtrack.service.BookService;
+import com.sast.sastreadtrack.utils.ReadingStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,44 +23,88 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public boolean addBook(Book book) {
-        //添加书籍
+        List<Book> bookList = bookMapper.selectByUserId(book.getUserId());
+        for(Book item : bookList) {
+            if(item.getTitle().equals(book.getTitle()) && item.getAuthor().equals(book.getAuthor())) {
+                return false;
+            }
+        }
+        if(book.getTotalPages() <= 0 || book.getCurrentPage() != 0) return false;
+
+        bookMapper.insert(book);
+        return true;
     }
 
     @Override
     @Transactional
     public boolean updateReadProgress(Long bookId, Integer currentPages, Long userId) {
-        //更新阅读进度
+        Book book = bookMapper.selectByUserIdAndBookId(userId, bookId);
+        if(book == null) return false;
+
+        if(currentPages < book.getTotalPages()) {
+            book.setCurrentPage(currentPages);
+            book.setStatus(ReadingStatus.READING);
+            bookMapper.updateReadProgress(book);
+            return true;
+        }
+        if(currentPages.equals(book.getTotalPages())) {
+            book.setCurrentPage(currentPages);
+            book.setStatus(ReadingStatus.FINISHED);
+            bookMapper.updateReadProgress(book);
+            return true;
+        }
+        return false;
     }
 
     @Override
     @Transactional
     public boolean updateStatus(Long bookId, String status, Long userId) {
-        // 更新阅读状态
+        Book book = bookMapper.selectByUserIdAndBookId(userId, bookId);
+        if(book == null) return false;
+        if(!ReadingStatus.isValid(status)) return false;
+
+        book.setStatus(status);
+        bookMapper.updateStatus(book);
+        if(status.equals(ReadingStatus.FINISHED)) {
+            book.setCurrentPage(book.getTotalPages());
+            bookMapper.updateReadProgress(book);
+        }
+        return true;
     }
 
     @Override
     @Transactional
     public boolean deleteBook(Long bookId, Long userId) {
-        //删除书籍
+        Book book = bookMapper.selectByUserIdAndBookId(userId, bookId);
+        if(book == null) return false;
+
+        bookMapper.deleteById(bookId, userId);
+        return true;
     }
 
     @Override
     public List<Book> getUserBooks(Long userId) {
-        //查询用户所有书籍
+        return bookMapper.selectByUserId(userId);
+    }
+
+    @Override
+    public Book getUserBook(Long userId, Long bookId) {
+        return bookMapper.selectByUserIdAndBookId(userId, bookId);
     }
 
     @Override
     public List<Book> getBooksByStatus(Long userId, String status) {
-        //按阅读状态筛选书籍
+        if(!ReadingStatus.isValid(status)) return new ArrayList<>();
+        return bookMapper.selectByUserIdAndStatus(userId, status);
     }
 
     @Override
     public List<Book> searchBooks(String keyword, Long userId) {
-        //模糊查询书籍
+        return bookMapper.searchBooks(keyword, userId);
     }
 
     @Override
     public Book getReadingStats(Long userId) {
-        //获取阅读统计信息
+        return bookMapper.getReadingStats(userId);
     }
 }

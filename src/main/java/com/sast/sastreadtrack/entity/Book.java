@@ -19,6 +19,6 @@ public class Book {
     private Integer totalPages;       // 总页数，对应数据库total_pages
     private Integer currentPage;      // 当前页数，对应数据库current_page
     private Date createdAt;           // 创建时间，对应数据库created_at
-    private Integer status;            // 阅读状态（未读0/阅读中1/已读2）
+    private String status;            // 阅读状态（未读0/阅读中1/已读2）
 }
 

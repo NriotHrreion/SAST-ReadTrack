@@ -3,7 +3,6 @@ package com.sast.sastreadtrack.mapper;
 import com.sast.sastreadtrack.entity.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
 /**
@@ -15,8 +14,7 @@ public interface UserMapper {
      * 新增用户
      */
     @Insert("INSERT INTO t_user (username, password) VALUES (#{username}, #{password})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
-    Long insert(User user);
+    int insert(User user);
 
     /**
      * 根据id查询用户

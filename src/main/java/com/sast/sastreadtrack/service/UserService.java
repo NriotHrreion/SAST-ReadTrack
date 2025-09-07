@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 /**
  * 用户服务接口
  */
-@Service
 public interface UserService {
     /**
      * 用户注册
@@ -25,11 +24,11 @@ public interface UserService {
 
     /**
      * 会话token验证
-     * @param username
+     * @param id
      * @param token
      * @return
      */
-    boolean authToken(String username, String token);
+    boolean authToken(Long id, String token);
 
     /**
      * 根据id获取用户信息
