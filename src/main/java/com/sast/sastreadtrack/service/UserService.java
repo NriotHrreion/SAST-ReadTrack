@@ -19,12 +19,25 @@ public interface UserService {
      * 用户登录
      * @param username 用户名
      * @param password 密码
-     * @return 登录成功返回用户信息
+     * @return 登录成功返回会话token
      */
-    User login(String username, String password);
+    String login(String username, String password);
+
+    /**
+     * 会话token验证
+     * @param username
+     * @param token
+     * @return
+     */
+    boolean authToken(String username, String token);
 
     /**
      * 根据id获取用户信息
      */
     User getUserById(Long id);
+
+    /**
+     * 根据用户名获取用户信息
+     */
+    User getUserByName(String username);
 }
